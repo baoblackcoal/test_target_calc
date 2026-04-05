@@ -50,45 +50,14 @@ jobs:
       - name: Build Windows executable
         run: python scripts/package_exe.py
 
-      - name: Smoke test executable CLI
+      - name: Smoke test executable
         shell: pwsh
         run: |
           $exe = Get-ChildItem dist\pycalc-cli-*-windows-*.exe | Select-Object -First 1
           if (-not $exe) {
             throw "Executable artifact was not created."
           }
-          & $exe.FullName --help
-
-      - name: Smoke test executable web mode
-        shell: pwsh
-        run: |
-          $exe = Get-ChildItem dist\pycalc-cli-*-windows-*.exe | Select-Object -First 1
-          if (-not $exe) {
-            throw "Executable artifact was not created."
-          }
-          $process = Start-Process -FilePath $exe.FullName -ArgumentList "--web","--host","127.0.0.1","--port","8765" -PassThru
-          try {
-            $ready = $false
-            for ($i = 0; $i -lt 30; $i++) {
-              try {
-                $response = Invoke-WebRequest -Uri "http://127.0.0.1:8765/" -UseBasicParsing
-                if ($response.Content -match "pycalc" -and $response.Content -match 'value="1\+2"') {
-                  $ready = $true
-                  break
-                }
-              } catch {
-              }
-              Start-Sleep -Seconds 1
-            }
-            if (-not $ready) {
-              throw "Executable web mode did not become ready."
-            }
-          } finally {
-            if ($null -ne $process -and -not $process.HasExited) {
-              Stop-Process -Id $process.Id -Force
-              Wait-Process -Id $process.Id
-            }
-          }
+          python scripts/smoke_test_exe.py $exe.FullName
 
       - name: Upload executable artifact
         uses: actions/upload-artifact@v4

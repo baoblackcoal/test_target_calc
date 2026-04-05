@@ -40,6 +40,7 @@ def test_help_is_available() -> None:
     completed = run_cli("--help")
     assert completed.returncode == 0
     assert "interactive" in completed.stdout
+    assert "--web" in completed.stdout
 
 
 def test_repl_accepts_multiple_inputs_and_recovers_from_errors() -> None:

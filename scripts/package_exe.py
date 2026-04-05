@@ -3,6 +3,7 @@
 import platform
 import shutil
 import sys
+import time
 from pathlib import Path
 
 from pycalc import __version__
@@ -28,6 +29,23 @@ def normalize_windows_arch(raw_arch: str) -> str:
 def artifact_path() -> Path:
     arch = normalize_windows_arch(platform.machine())
     return DIST / f"pycalc-cli-{__version__}-windows-{arch}.exe"
+
+
+def remove_with_retries(path: Path, attempts: int = 10, delay_seconds: float = 1.0) -> None:
+    if not path.exists():
+        return
+
+    last_error: PermissionError | None = None
+    for _ in range(attempts):
+        try:
+            path.unlink()
+            return
+        except PermissionError as error:
+            last_error = error
+            time.sleep(delay_seconds)
+
+    if last_error is not None:
+        raise last_error
 
 
 def main() -> int:
@@ -75,8 +93,7 @@ def main() -> int:
 
     built_exe = temp_dist / "pycalc-cli.exe"
     final_exe = artifact_path()
-    if final_exe.exists():
-        final_exe.unlink()
+    remove_with_retries(final_exe)
     shutil.move(str(built_exe), str(final_exe))
     shutil.rmtree(temp_dist, ignore_errors=True)
     print(final_exe)
