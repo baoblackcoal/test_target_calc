@@ -21,8 +21,7 @@ python -m venv .venv
 Run quality checks:
 
 ```powershell
-python -m ruff check .
-python -m pytest
+python scripts/check.py
 ```
 
 ## Usage
