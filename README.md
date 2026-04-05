@@ -24,6 +24,16 @@ Run quality checks:
 python scripts/check.py
 ```
 
+Build release artifacts:
+
+```powershell
+python -m build
+python scripts/package_web.py
+python scripts/package_exe.py
+```
+
+`package_exe.py` must run on Windows and emits `dist/pycalc-cli-<version>-windows-<arch>.exe`.
+
 ## Usage
 
 CLI:
@@ -31,6 +41,7 @@ CLI:
 ```powershell
 python -m pycalc.cli "1 + 2 * 3"
 python -m pycalc.cli --repl
+dist\pycalc-cli-0.1.2-windows-x64.exe "1 + 2 * 3"
 ```
 
 Web:
