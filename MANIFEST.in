@@ -1,0 +1,2 @@
+include README.md
+recursive-include src/pycalc/templates *.html
