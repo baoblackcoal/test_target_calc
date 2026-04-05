@@ -1,4 +1,4 @@
-"""Build a Windows executable for the pycalc CLI."""
+"""Build a Windows executable for the pycalc packaged app."""
 
 import platform
 import shutil
@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DIST = ROOT / "dist"
 BUILD_ROOT = ROOT / "build" / "pyinstaller"
 ENTRYPOINT = ROOT / "scripts" / "pycalc_cli_entry.py"
+TEMPLATES = ROOT / "src" / "pycalc" / "templates"
 
 
 def normalize_windows_arch(raw_arch: str) -> str:
@@ -58,6 +59,8 @@ def main() -> int:
             "--onefile",
             "--name",
             "pycalc-cli",
+            "--add-data",
+            f"{TEMPLATES};pycalc/templates",
             "--paths",
             str(ROOT / "src"),
             "--distpath",

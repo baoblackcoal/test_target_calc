@@ -14,7 +14,7 @@ EXIT_COMMANDS = {"exit", "quit", ":q"}
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="calc",
-        description="Evaluate arithmetic expressions or start an interactive calculator REPL.",
+        description="Evaluate arithmetic expressions, start a REPL, or launch the web UI.",
     )
     parser.add_argument("expression", nargs="?", help="Expression to evaluate once and exit.")
     parser.add_argument(
@@ -22,12 +22,37 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Start an interactive session for repeated calculations.",
     )
+    parser.add_argument(
+        "--web",
+        action="store_true",
+        help="Run the Flask web calculator.",
+    )
+    parser.add_argument(
+        "--host",
+        default="127.0.0.1",
+        help="Host interface for web mode. Default: 127.0.0.1.",
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=5000,
+        help="Port for web mode. Default: 5000.",
+    )
     return parser
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+
+    if args.web and args.repl:
+        parser.error("--web cannot be used together with --repl.")
+
+    if args.web and args.expression is not None:
+        parser.error("expression cannot be provided together with --web.")
+
+    if args.web:
+        return run_web_server(host=args.host, port=args.port)
 
     if args.repl:
         return run_repl()
@@ -66,6 +91,13 @@ def run_repl() -> int:
             print(result.value_text)
         else:
             print(result.error_message)
+
+
+def run_web_server(host: str, port: int) -> int:
+    from pycalc.web.app import create_app
+
+    create_app().run(host=host, port=port, debug=False, use_reloader=False)
+    return 0
 
 
 if __name__ == "__main__":

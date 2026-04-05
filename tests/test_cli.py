@@ -4,6 +4,10 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
+from pycalc import cli
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -46,3 +50,26 @@ def test_repl_accepts_multiple_inputs_and_recovers_from_errors() -> None:
     assert "Division by zero is not allowed." in completed.stdout
     assert "8" in completed.stdout
     assert "Bye." in completed.stdout
+
+
+def test_web_mode_dispatches_to_flask_runner(monkeypatch: pytest.MonkeyPatch) -> None:
+    captured: dict[str, object] = {}
+
+    def fake_run_web_server(host: str, port: int) -> int:
+        captured["host"] = host
+        captured["port"] = port
+        return 0
+
+    monkeypatch.setattr(cli, "run_web_server", fake_run_web_server)
+
+    exit_code = cli.main(["--web", "--host", "127.0.0.1", "--port", "5050"])
+
+    assert exit_code == 0
+    assert captured == {"host": "127.0.0.1", "port": 5050}
+
+
+def test_web_mode_rejects_expression_argument() -> None:
+    with pytest.raises(SystemExit) as exc_info:
+        cli.main(["--web", "1+2"])
+
+    assert exc_info.value.code == 2

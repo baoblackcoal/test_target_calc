@@ -1,4 +1,4 @@
-"""PyInstaller entry point for the pycalc CLI."""
+"""PyInstaller entry point for the pycalc packaged app."""
 
 from pycalc.cli import main
 

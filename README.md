@@ -41,7 +41,9 @@ CLI:
 ```powershell
 python -m pycalc.cli "1 + 2 * 3"
 python -m pycalc.cli --repl
-dist\pycalc-cli-0.1.2-windows-x64.exe "1 + 2 * 3"
+python -m pycalc.cli --web --host 127.0.0.1 --port 5000
+dist\pycalc-cli-0.1.3-windows-x64.exe "1 + 2 * 3"
+dist\pycalc-cli-0.1.3-windows-x64.exe --web --host 127.0.0.1 --port 5000
 ```
 
 Web:
