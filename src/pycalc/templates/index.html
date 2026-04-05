@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>pycalc</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f5efe3;
+        --panel: #fffdf8;
+        --ink: #1f2933;
+        --muted: #52606d;
+        --accent: #d97706;
+        --accent-dark: #9a3412;
+        --error-bg: #fde8e8;
+        --error-text: #9b1c1c;
+        --border: #e5d7b8;
+        --shadow: 0 20px 40px rgba(120, 87, 31, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+        background:
+          radial-gradient(circle at top left, rgba(245, 158, 11, 0.2), transparent 30%),
+          linear-gradient(135deg, #f8f3e9, var(--bg));
+        color: var(--ink);
+      }
+
+      main {
+        width: min(960px, calc(100% - 2rem));
+        margin: 2rem auto;
+        display: grid;
+        gap: 1.5rem;
+      }
+
+      .hero,
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        box-shadow: var(--shadow);
+      }
+
+      .hero {
+        padding: 2rem;
+      }
+
+      .hero h1 {
+        margin: 0 0 0.5rem;
+        font-size: clamp(2rem, 5vw, 3.5rem);
+      }
+
+      .hero p {
+        margin: 0;
+        color: var(--muted);
+        max-width: 38rem;
+        line-height: 1.5;
+      }
+
+      .panel {
+        padding: 1.5rem;
+      }
+
+      form {
+        display: grid;
+        gap: 1rem;
+      }
+
+      label,
+      h2 {
+        font-weight: 700;
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 7rem;
+        padding: 1rem;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        resize: vertical;
+        font: inherit;
+      }
+
+      button {
+        width: fit-content;
+        border: 0;
+        border-radius: 999px;
+        padding: 0.85rem 1.4rem;
+        background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+        color: white;
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .result,
+      .error {
+        margin-top: 1rem;
+        padding: 1rem;
+        border-radius: 16px;
+      }
+
+      .result {
+        background: #fff7ed;
+      }
+
+      .error {
+        background: var(--error-bg);
+        color: var(--error-text);
+      }
+
+      .history-list {
+        list-style: none;
+        margin: 1rem 0 0;
+        padding: 0;
+        display: grid;
+        gap: 0.75rem;
+      }
+
+      .history-item {
+        padding: 1rem;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background: #fffdfa;
+      }
+
+      .history-expression {
+        margin: 0 0 0.35rem;
+        color: var(--muted);
+        word-break: break-word;
+      }
+
+      .history-value {
+        margin: 0;
+        font-size: 1.15rem;
+        font-weight: 700;
+      }
+
+      @media (max-width: 700px) {
+        main {
+          width: min(100% - 1rem, 960px);
+          margin: 1rem auto;
+        }
+
+        .hero,
+        .panel {
+          border-radius: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="hero">
+        <h1>pycalc</h1>
+        <p>Safe arithmetic for the terminal and the browser. Use the same engine everywhere and keep your current session history on this page.</p>
+      </section>
+
+      <section class="panel">
+        <form method="post" action="/calculate">
+          <label for="expression">Expression</label>
+          <textarea id="expression" name="expression" placeholder="(1 + 2) * 3">{{ expression }}</textarea>
+          <button type="submit">Calculate</button>
+        </form>
+
+        {% if result %}
+          {% if result.ok %}
+            <div class="result" aria-live="polite">
+              <strong>Result:</strong> {{ result.value_text }}
+            </div>
+          {% else %}
+            <div class="error" aria-live="polite">
+              <strong>Error:</strong> {{ result.error_message }}
+            </div>
+          {% endif %}
+        {% endif %}
+      </section>
+
+      <section class="panel">
+        <h2>Session History</h2>
+        {% if history %}
+          <ul class="history-list">
+            {% for item in history %}
+              <li class="history-item">
+                <p class="history-expression">{{ item.expression }}</p>
+                {% if item.value_text %}
+                  <p class="history-value">{{ item.value_text }}</p>
+                {% else %}
+                  <p class="history-value">{{ item.error_message }}</p>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p>No calculations yet.</p>
+        {% endif %}
+      </section>
+    </main>
+  </body>
+</html>
