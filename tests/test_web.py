@@ -11,6 +11,8 @@ def test_home_page_loads() -> None:
     assert response.status_code == 200
     assert "pycalc" in body
     assert "Session History" in body
+    assert 'id="expression"' in body
+    assert 'value="1+2"' in body
 
 
 def test_web_calculates_valid_expression() -> None:
@@ -23,6 +25,7 @@ def test_web_calculates_valid_expression() -> None:
     assert response.status_code == 200
     assert "Result:" in body
     assert "7" in body
+    assert 'value="1 + 2 * 3"' in body
 
 
 def test_web_shows_error_for_invalid_expression() -> None:
@@ -35,6 +38,7 @@ def test_web_shows_error_for_invalid_expression() -> None:
     assert response.status_code == 200
     assert "Error:" in body
     assert "Division by zero is not allowed." in body
+    assert 'value="1 / 0"' in body
 
 
 def test_web_keeps_recent_history_first() -> None:
@@ -48,3 +52,15 @@ def test_web_keeps_recent_history_first() -> None:
     latest_index = body.index("3 * 3")
     older_index = body.index("1 + 1")
     assert latest_index < older_index
+
+
+def test_home_page_default_expression_calculates_to_three() -> None:
+    app = create_app()
+    client = app.test_client()
+
+    response = client.post("/calculate", data={"expression": "1+2"})
+
+    body = response.get_data(as_text=True)
+    assert response.status_code == 200
+    assert "Result:" in body
+    assert "3" in body

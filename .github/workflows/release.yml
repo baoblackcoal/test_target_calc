@@ -1,11 +1,15 @@
 name: Release
 
 on:
-  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
 
 jobs:
   build-release-artifacts:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Check out source
         uses: actions/checkout@v4
@@ -19,6 +23,19 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install -e .[dev]
+
+      - name: Verify tag matches package version
+        shell: bash
+        run: |
+          TAG_NAME="${GITHUB_REF_NAME#refs/tags/}"
+          VERSION="$(python -c "from pycalc import __version__; print(__version__)")"
+          if [ "v${VERSION}" != "${TAG_NAME}" ]; then
+            echo "Tag ${TAG_NAME} does not match package version v${VERSION}"
+            exit 1
+          fi
+
+      - name: Run quality gate
+        run: python scripts/check.py
 
       - name: Build Python package artifacts
         run: python -m build
@@ -39,3 +56,11 @@ jobs:
         with:
           name: pycalc-web-artifact
           path: dist/pycalc-web-service-*.zip
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.whl
+            dist/*.tar.gz
+            dist/pycalc-web-service-*.zip

@@ -78,13 +78,11 @@
         font-weight: 700;
       }
 
-      textarea {
+      .expression-input {
         width: 100%;
-        min-height: 7rem;
         padding: 1rem;
         border: 1px solid var(--border);
         border-radius: 16px;
-        resize: vertical;
         font: inherit;
       }
 
@@ -166,7 +164,16 @@
       <section class="panel">
         <form method="post" action="/calculate">
           <label for="expression">Expression</label>
-          <textarea id="expression" name="expression" placeholder="(1 + 2) * 3">{{ expression }}</textarea>
+          <input
+            class="expression-input"
+            id="expression"
+            name="expression"
+            type="text"
+            value="{{ expression }}"
+            placeholder="(1 + 2) * 3"
+            autocomplete="off"
+          >
+          <p>Press Enter to calculate.</p>
           <button type="submit">Calculate</button>
         </form>
 

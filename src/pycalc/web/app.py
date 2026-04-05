@@ -17,7 +17,7 @@ def create_app() -> Flask:
     def index() -> str:
         return render_template(
             "index.html",
-            expression="",
+            expression="1+2",
             result=None,
             history=_get_history(),
         )
